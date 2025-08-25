@@ -46,20 +46,19 @@ const productShema = new mongoose.Schema({
             message: 'La categoria debe existir y estar activa'
         }
     },
-    Subcategory: {
+    subcategory: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Subcategoria',
+        ref: 'Subcategory',
         required: [true, 'La subcategoria es requerida'],
         validate: {
-            validator: async function (SubcategoryId) {
-                const Subcategory = mongoose.model('Category');
-                const subcategory = await subcategory.findById(SubcategoryId);
-                return subcategory && subcategory.isActive;
+            validator: async function (subcategoryId) {
+                const SubcategoryModel = mongoose.model('Subcategory');
+                const subcat = await SubcategoryModel.findById(subcategoryId);
+                return subcat && subcat.isActive;
             },
             message: 'La subcategoria debe existir y estar activa'
         }
     },
-
     price: {
         type: Number,
         required: [true, 'El precio es requerido'],
@@ -144,17 +143,17 @@ const productShema = new mongoose.Schema({
             default: false,
         }
     }],
-    tags: {
+    tags: [{
         type: String,
         trim: true,
         lowercase: true,
         maxlength: [50, 'Cada tab no puede exceder los 50 caracteres']
-    },
+    }],
     isActive: {
         type: Boolean,
         default: true,
     },
-    isFeactured: {
+    isFeatured: {
         type: Boolean,
         default: true,
     },
@@ -204,9 +203,9 @@ productShema.pre('findOneAndUpdate', function (next) {
     next();
 });
 productShema.pre('save', async function (next) {
-    if (this.isModified('category')|| this.isModified('Subcategory')){
+    if (this.isModified('subcategory')|| this.isModified('Subcategory')){
         const Subcategory = mongoose.model('Subcategory');
-        const subcategory= await subcategory.findById(this.subcategory)
+        const subcategory= await Subcategory.findById(this.subcategory)
 
         if (!subcategory){
             return next (new Error('La subcategoria especifica no exisrte'));
